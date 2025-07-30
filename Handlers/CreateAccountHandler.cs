@@ -1,13 +1,15 @@
-using AccountService.Models;
+п»їusing AccountService.Models;
 using AccountService.Services;
 using FluentValidation;
 using MediatR;
+using Microsoft.Extensions.Options;
+using AccountService.Configuration;
 
 namespace AccountService.Handlers
 {
     public sealed record CreateAccountCommand(
         Guid OwnerId,
-        AccountType Type,
+        EAccountType Type,
         string Currency,
         decimal? InterestRate,
         DateTime? OpeningDate = null,
@@ -16,36 +18,44 @@ namespace AccountService.Handlers
 
     public class CreateAccountValidator : AbstractValidator<CreateAccountCommand>
     {
-        public CreateAccountValidator(IClientService clientService, ICurrencyService currencyService)
+        public CreateAccountValidator(
+            IClientService clientService,
+            ICurrencyService currencyService,
+            IOptions<AccountServiceOptions> options)
         {
+            const decimal minDepositRate = 0.01m;
+            const decimal maxCreditRate = -0.01m;
+
             RuleFor(x => x.OwnerId)
                 .MustAsync(async (id, _) => await clientService.VerifyClientAsync(id))
-                .WithMessage("Клиент не существует");
+                .WithMessage("РљР»РёРµРЅС‚ РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚");
 
             RuleFor(x => x.Currency)
                 .MustAsync(async (c, _) => await currencyService.IsSupportedAsync(c))
-                .WithMessage("Неподдерживаемая валюта");
+                .WithMessage("РќРµРїРѕРґРґРµСЂР¶РёРІР°РµРјР°СЏ РІР°Р»СЋС‚Р°");
 
             RuleFor(x => x.InterestRate)
-                .NotNull().WithMessage("Процентная ставка обязательна")
-                .When(x => x.Type is AccountType.Deposit or AccountType.Credit);
+                .NotNull().WithMessage("РџСЂРѕС†РµРЅС‚РЅР°СЏ СЃС‚Р°РІРєР° РѕР±СЏР·Р°С‚РµР»СЊРЅР°")
+                .When(x => x.Type is EAccountType.Deposit or EAccountType.Credit);
 
             RuleFor(x => x.InterestRate)
-                .GreaterThan(0).WithMessage("Ставка должна быть > 0")
-                .When(x => x.Type == AccountType.Deposit);
+                .GreaterThan(minDepositRate)
+                .WithMessage($"РЎС‚Р°РІРєР° РґРѕР»Р¶РЅР° Р±С‹С‚СЊ > {minDepositRate}")
+                .When(x => x.Type == EAccountType.Deposit);
 
             RuleFor(x => x.InterestRate)
-                .LessThan(0).WithMessage("Ставка должна быть < 0")
-                .When(x => x.Type == AccountType.Credit);
+                .LessThan(maxCreditRate)
+                .WithMessage($"РЎС‚Р°РІРєР° РґРѕР»Р¶РЅР° Р±С‹С‚СЊ < {maxCreditRate}")
+                .When(x => x.Type == EAccountType.Credit);
 
             RuleFor(x => x.OpeningDate)
                 .LessThanOrEqualTo(DateTime.UtcNow)
-                .WithMessage("Дата открытия не может быть в будущем")
+                .WithMessage("Р”Р°С‚Р° РѕС‚РєСЂС‹С‚РёСЏ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РІ Р±СѓРґСѓС‰РµРј")
                 .When(x => x.OpeningDate.HasValue);
 
             RuleFor(x => x.ClosingDate)
                 .GreaterThan(x => x.OpeningDate ?? DateTime.UtcNow)
-                .WithMessage("Дата закрытия должна быть после даты открытия")
+                .WithMessage("Р”Р°С‚Р° Р·Р°РєСЂС‹С‚РёСЏ РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РїРѕСЃР»Рµ РґР°С‚С‹ РѕС‚РєСЂС‹С‚РёСЏ")
                 .When(x => x.ClosingDate.HasValue);
         }
     }

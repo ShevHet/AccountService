@@ -1,4 +1,4 @@
-using AccountService.Models;
+ο»Ώusing AccountService.Models;
 using AccountService.Services;
 using MediatR;
 
@@ -18,7 +18,7 @@ namespace AccountService.Handlers
         public async Task<Account> Handle(GetAccountByIdQuery req, CancellationToken ct)
         {
             var account = await _repo.GetByIdAsync(req.AccountId, ct);
-            return account ?? throw new KeyNotFoundException("Ρχες νε νΰιδεν");
+            return account ?? throw new KeyNotFoundException("Π΅Ρ‡ΠµΡ‚ Π½Πµ Π½Π°ΠΉΠ΄ΠµΠ½");
         }
         
     }

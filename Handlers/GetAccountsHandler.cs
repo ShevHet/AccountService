@@ -1,7 +1,9 @@
-using AccountService.Models;
+Ôªøusing AccountService.Models;
 using AccountService.Services;
 using FluentValidation;
 using MediatR;
+using Microsoft.Extensions.Options;
+using AccountService.Configuration;
 
 namespace AccountService.Handlers
 {
@@ -9,15 +11,20 @@ namespace AccountService.Handlers
         int Page = 1,
         int Size = 10,
         Guid? OwnerId = null,
-        AccountType? Type = null
+        EAccountType? Type = null
     ) : IRequest<PagedResponse<Account>>;
 
     public class GetAccountsValidator : AbstractValidator<GetAccountsQuery>
     {
-        public GetAccountsValidator()
+        public GetAccountsValidator(IOptions<AccountServiceOptions> options)
         {
-            RuleFor(x => x.Page).GreaterThan(0).WithMessage("ÕÓÏÂ ÒÚ‡ÌËˆ˚ ‰ÓÎÊÂÌ ·˚Ú¸ ·ÓÎ¸¯Â 0");
-            RuleFor(x => x.Size).InclusiveBetween(1, 100).WithMessage("–‡ÁÏÂ ÒÚ‡ÌËˆ˚ ‰ÓÎÊÂÌ ·˚Ú¸ ÓÚ 1 ‰Ó 100");
+            var settings = options.Value.Pagination;
+            RuleFor(x => x.Page)
+                .GreaterThan(0)
+                .WithMessage($"–ù–æ–º–µ—Ä —Å—Ç—Ä–∞–Ω–∏—Ü—ã –¥–æ–ª–∂–µ–Ω –±—ã—Ç—å –±–æ–ª—å—à–µ 0");
+            RuleFor(x => x.Size)
+                .InclusiveBetween(settings.MinPageSize, settings.MaxPageSize)
+                .WithMessage($"–†–∞–∑–º–µ—Ä —Å—Ç—Ä–∞–Ω–∏—Ü—ã –¥–æ–ª–∂–µ–Ω –±—ã—Ç—å –æ—Ç {settings.MinPageSize} –¥–æ {settings.MaxPageSize}");
         }
     }
 

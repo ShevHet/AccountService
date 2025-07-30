@@ -42,7 +42,7 @@
             "name": "type",
             "in": "query",
             "schema": {
-              "$ref": "#/components/schemas/AccountType"
+              "$ref": "#/components/schemas/EAccountType"
             }
           }
         ],
@@ -1040,7 +1040,7 @@
             "format": "uuid"
           },
           "type": {
-            "$ref": "#/components/schemas/AccountType"
+            "$ref": "#/components/schemas/EAccountType"
           },
           "currency": {
             "type": "string",
@@ -1141,7 +1141,7 @@
         },
         "additionalProperties": false
       },
-      "AccountType": {
+      "EAccountType": {
         "enum": [
           0,
           1,
@@ -1158,7 +1158,7 @@
             "format": "uuid"
           },
           "type": {
-            "$ref": "#/components/schemas/AccountType"
+            "$ref": "#/components/schemas/EAccountType"
           },
           "currency": {
             "type": "string",
@@ -1199,7 +1199,7 @@
             "nullable": true
           },
           "type": {
-            "$ref": "#/components/schemas/AccountType"
+            "$ref": "#/components/schemas/EAccountType"
           }
         },
         "additionalProperties": false

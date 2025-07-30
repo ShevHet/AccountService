@@ -1,4 +1,4 @@
-namespace AccountService.Models
+﻿namespace AccountService.Models
 {
     public record PagedResponse<T>(
         IEnumerable<T> Items,

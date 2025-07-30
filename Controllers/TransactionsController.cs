@@ -1,4 +1,4 @@
-using AccountService.Handlers;
+п»їusing AccountService.Handlers;
 using AccountService.Models;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +14,7 @@ namespace AccountService.Controllers
         public TransactionsController(IMediator mediator) => _mediator = mediator;
 
         /// <summary>
-        /// Зарегистрировать операцию по счету
+        /// Р—Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°С‚СЊ РѕРїРµСЂР°С†РёСЋ РїРѕ СЃС‡РµС‚Сѓ
         /// </summary>
         [HttpPost]
         [ProducesResponseType(204)]
@@ -26,11 +26,11 @@ namespace AccountService.Controllers
         }
 
         /// <summary>
-        /// Получить транзакции по фильтру
+        /// РџРѕР»СѓС‡РёС‚СЊ С‚СЂР°РЅР·Р°РєС†РёРё РїРѕ С„РёР»СЊС‚СЂСѓ
         /// </summary>
-        /// <param name="accountId">ID счета (опционально)</param>
-        /// <param name="page">Номер страницы</param>
-        /// <param name="size">Размер страницы</param>
+        /// <param name="accountId">ID СЃС‡РµС‚Р° (РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ)</param>
+        /// <param name="page">РќРѕРјРµСЂ СЃС‚СЂР°РЅРёС†С‹</param>
+        /// <param name="size">Р Р°Р·РјРµСЂ СЃС‚СЂР°РЅРёС†С‹</param>
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(PagedResponse<Transaction>))]
         public async Task<ActionResult> GetTransactions(

@@ -1,4 +1,4 @@
-using AccountService.Models;
+п»їusing AccountService.Models;
 using AccountService.Services;
 using FluentValidation;
 using MediatR;
@@ -17,7 +17,7 @@ namespace AccountService.Handlers
         {
             RuleFor(x => x.Id).NotEmpty();
             RuleFor(x => x.InterestRate)
-                .GreaterThan(0).WithMessage("Ставка должна быть положительной")
+                .GreaterThan(0).WithMessage("РЎС‚Р°РІРєР° РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РїРѕР»РѕР¶РёС‚РµР»СЊРЅРѕР№")
                 .When(x => x.InterestRate.HasValue);
         }
     }
@@ -46,7 +46,7 @@ namespace AccountService.Handlers
             var account = await _repository.GetByIdAsync(request.Id);
             if (account == null)
             {
-                throw new ArgumentException("Такого счета не существует");
+                throw new ArgumentException("РўР°РєРѕРіРѕ СЃС‡РµС‚Р° РЅРµ СЃСѓС‰РµСЃС‚РІСѓРµС‚");
             }
 
             if (request.InterestRate.HasValue)
@@ -58,7 +58,7 @@ namespace AccountService.Handlers
             {
                 if (request.ClosingDate.Value < DateTime.UtcNow.AddMinutes(-5))
                 {
-                    throw new InvalidOperationException("Дата закрытия не может быть в прошлом");
+                    throw new InvalidOperationException("Р”Р°С‚Р° Р·Р°РєСЂС‹С‚РёСЏ РЅРµ РјРѕР¶РµС‚ Р±С‹С‚СЊ РІ РїСЂРѕС€Р»РѕРј");
                 }
                 account.ClosingDate = request.ClosingDate;
             }

@@ -1,4 +1,4 @@
-using AccountService.Models;
+п»їusing AccountService.Models;
 using AccountService.Services;
 using FluentValidation;
 using MediatR;
@@ -21,10 +21,10 @@ namespace AccountService.Handlers
             RuleFor(x => x.To)
                 .GreaterThanOrEqualTo(x => x.From)
                 .When(x => x.From.HasValue && x.To.HasValue)
-                .WithMessage("Дата 'до' должна быть после даты 'с'");
+                .WithMessage("Р”Р°С‚Р° 'РґРѕ' РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РїРѕСЃР»Рµ РґР°С‚С‹ 'СЃ'");
             RuleFor(x => x.Format)
                 .Must(f => f == "json" || f == "pdf")
-                .WithMessage("Неподдерживаемый формат. Допустимые значения: json, pdf");
+                .WithMessage("РќРµРїРѕРґРґРµСЂР¶РёРІР°РµРјС‹Р№ С„РѕСЂРјР°С‚. Р”РѕРїСѓСЃС‚РёРјС‹Рµ Р·РЅР°С‡РµРЅРёСЏ: json, pdf");
         }
     }
 
@@ -52,7 +52,7 @@ namespace AccountService.Handlers
             var account = await _repository.GetByIdAsync(request.AccountId);
             if (account == null)
             {
-                return new NotFoundObjectResult("Счет не найден");
+                return new NotFoundObjectResult("РЎС‡РµС‚ РЅРµ РЅР°Р№РґРµРЅ");
             }
 
             var transactions = account.Transactions.AsEnumerable();
@@ -82,7 +82,7 @@ namespace AccountService.Handlers
 
         private byte[] GeneratePdf(List<Transaction> transactions)
         {
-            return System.Text.Encoding.UTF8.GetBytes("PDF заглушка");
+            return System.Text.Encoding.UTF8.GetBytes("PDF Р·Р°РіР»СѓС€РєР°");
         }
     }
 }

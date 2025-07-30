@@ -1,7 +1,9 @@
-using AccountService.Models;
+п»їusing AccountService.Models;
 using AccountService.Services;
 using FluentValidation;
 using MediatR;
+using Microsoft.Extensions.Options;
+using AccountService.Configuration;
 
 namespace AccountService.Handlers
 {
@@ -9,20 +11,25 @@ namespace AccountService.Handlers
     Guid AccountId,
     decimal Amount,
     string Currency,
-    TransactionType Type,
+    ETransactionType Type,
     string Description
 ) : IRequest<Unit>;
 
     public class RegisterTransactionValidator : AbstractValidator<RegisterTransactionCommand>
     {
-        public RegisterTransactionValidator(ICurrencyService currencyService)
+        public RegisterTransactionValidator(ICurrencyService currencyService,
+            IOptions<AccountServiceOptions> options)
         {
+            var maxLength = options.Value.Validation.MaxDescriptionLength;
+
             RuleFor(x => x.AccountId).NotEmpty();
             RuleFor(x => x.Amount).GreaterThan(0);
             RuleFor(x => x.Currency)
                 .MustAsync(async (c, _) => await currencyService.IsSupportedAsync(c))
-                .WithMessage("Валюта операции не поддерживается");
-            RuleFor(x => x.Description).NotEmpty().MaximumLength(500);
+                .WithMessage("Р’Р°Р»СЋС‚Р° РѕРїРµСЂР°С†РёРё РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚СЃСЏ");
+            RuleFor(x => x.Description)
+                .NotEmpty()
+                .MaximumLength(maxLength);
         }
     }
 
@@ -50,30 +57,31 @@ namespace AccountService.Handlers
             var account = await _repository.GetByIdAsync(request.AccountId);
             if (account == null)
             {
-                throw new ArgumentException("Счет не найден");
+                throw new ArgumentException("РЎС‡РµС‚ РЅРµ РЅР°Р№РґРµРЅ");
+
             }
 
-            // Проверка что счет активен
+            // РџСЂРѕРІРµСЂРєР° С‡С‚Рѕ СЃС‡РµС‚ Р°РєС‚РёРІРµРЅ
             if (account.ClosingDate.HasValue)
             {
-                throw new InvalidOperationException("Операции по закрытому счету запрещены");
+                throw new InvalidOperationException("РћРїРµСЂР°С†РёРё РїРѕ Р·Р°РєСЂС‹С‚РѕРјСѓ СЃС‡РµС‚Сѓ Р·Р°РїСЂРµС‰РµРЅС‹");
             }
 
-            // Проверка валюты
+            // РџСЂРѕРІРµСЂРєР° РІР°Р»СЋС‚С‹
             if (!account.Currency.Equals(request.Currency, StringComparison.OrdinalIgnoreCase))
             {
                 throw new InvalidOperationException(
-                    $"Валюта счета ({account.Currency}) не совпадает с валютой операции ({request.Currency})");
+                    $"Р’Р°Р»СЋС‚Р° СЃС‡РµС‚Р° ({account.Currency}) РЅРµ СЃРѕРІРїР°РґР°РµС‚ СЃ РІР°Р»СЋС‚РѕР№ РѕРїРµСЂР°С†РёРё ({request.Currency})");
             }
 
-            // Для списания - проверка баланса (кроме кредитных счетов)
-            if (request.Type == TransactionType.Debit && account.Balance < request.Amount && account.Type != AccountType.Credit)
+            // Р”Р»СЏ СЃРїРёСЃР°РЅРёСЏ - РїСЂРѕРІРµСЂРєР° Р±Р°Р»Р°РЅСЃР° (РєСЂРѕРјРµ РєСЂРµРґРёС‚РЅС‹С… СЃС‡РµС‚РѕРІ)
+            if (request.Type == ETransactionType.Debit && account.Balance < request.Amount && account.Type != EAccountType.Credit)
             {
                 throw new InvalidOperationException(
-                    $"Недостаточно средств. Требуется: {request.Amount}, доступно: {account.Balance}");
+                    $"РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ СЃСЂРµРґСЃС‚РІ. РўСЂРµР±СѓРµС‚СЃСЏ: {request.Amount}, РґРѕСЃС‚СѓРїРЅРѕ: {account.Balance}");
             }
 
-            // Создаем транзакцию
+            // РЎРѕР·РґР°РµРј С‚СЂР°РЅР·Р°РєС†РёСЋ
             var transaction = new Transaction
             {
                 Id = Guid.NewGuid(),
@@ -85,8 +93,8 @@ namespace AccountService.Handlers
                 DateTime = DateTime.UtcNow
             };
 
-            // Обновляем баланс
-            if (request.Type == TransactionType.Credit)
+            // РћР±РЅРѕРІР»СЏРµРј Р±Р°Р»Р°РЅСЃ
+            if (request.Type == ETransactionType.Credit)
             {
                 account.Balance += request.Amount;
             }

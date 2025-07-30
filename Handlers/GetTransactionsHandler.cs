@@ -1,7 +1,9 @@
-using AccountService.Models;
+﻿using AccountService.Models;
 using AccountService.Services;
 using FluentValidation;
 using MediatR;
+using AccountService.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace AccountService.Handlers
 {
@@ -13,10 +15,11 @@ namespace AccountService.Handlers
 
     public class GetTransactionsValidator : AbstractValidator<GetTransactionsQuery>
     {
-        public GetTransactionsValidator()
+        public GetTransactionsValidator(IOptions<AccountServiceOptions> options)
         {
+            var settings = options.Value.Pagination;
             RuleFor(x => x.Page).GreaterThan(0);
-            RuleFor(x => x.Size).InclusiveBetween(1, 100);
+            RuleFor(x => x.Size).InclusiveBetween(settings.MinPageSize, settings.MaxPageSize);
         }
     }
 

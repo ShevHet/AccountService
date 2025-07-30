@@ -1,4 +1,4 @@
-
+﻿
 namespace AccountService.Services;
 
 public interface IClientVerificationService

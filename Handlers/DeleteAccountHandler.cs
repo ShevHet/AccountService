@@ -1,11 +1,11 @@
-using AccountService.Services;
+п»їusing AccountService.Services;
 using MediatR;
 
 namespace AccountService.Handlers
 {
-    public sealed record DeleteAccountCommand(Guid AccountId) : IRequest<Unit>; // Изменено
+    public sealed record DeleteAccountCommand(Guid AccountId) : IRequest<Unit>; // РР·РјРµРЅРµРЅРѕ
 
-    public class DeleteAccountHandler : IRequestHandler<DeleteAccountCommand, Unit> // Добавлен Unit
+    public class DeleteAccountHandler : IRequestHandler<DeleteAccountCommand, Unit> // Р”РѕР±Р°РІР»РµРЅ Unit
     {
         private readonly IAccountRepository _repository;
 
@@ -25,12 +25,12 @@ namespace AccountService.Handlers
             if (account.Balance != 0)
             {
                 throw new InvalidOperationException(
-                    $"Нельзя закрыть счет с балансом {account.Balance} {account.Currency}");
+                    $"РќРµР»СЊР·СЏ Р·Р°РєСЂС‹С‚СЊ СЃС‡РµС‚ СЃ Р±Р°Р»Р°РЅСЃРѕРј {account.Balance} {account.Currency}");
             }
 
             account.ClosingDate = DateTime.UtcNow;
             await _repository.UpdateAsync(account);
-            return Unit.Value; // Важно!
+            return Unit.Value; // Р’Р°Р¶РЅРѕ!
         }
     }
 }

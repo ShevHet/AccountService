@@ -1,9 +1,13 @@
-using AccountService.Behaviors;
+п»їusing AccountService.Behaviors;
 using AccountService.Filters;
 using AccountService.Services;
 using FluentValidation;
 using MediatR;
 using Microsoft.OpenApi.Models;
+using AccountService.Configuration;
+using Microsoft.Extensions.Options;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,7 +18,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "Account Service API",
         Version = "v1",
-        Description = "Микросервис для управления банковскими счетами"
+        Description = "РњРёРєСЂРѕСЃРµСЂРІРёСЃ РґР»СЏ СѓРїСЂР°РІР»РµРЅРёСЏ Р±Р°РЅРєРѕРІСЃРєРёРјРё СЃС‡РµС‚Р°РјРё"
     });
 
     var xmlPath = Path.Combine(AppContext.BaseDirectory, "AccountService.xml");
@@ -26,7 +30,7 @@ builder.Services.AddSwaggerGen(c =>
     c.OperationFilter<SwaggerDefaultResponseFilter>();
 });
 
-// Контроллеры
+// РљРѕРЅС‚СЂРѕР»Р»РµСЂС‹
 builder.Services.AddControllers(opt =>
 {
     opt.Filters.Add<ValidationExceptionFilter>();
@@ -41,12 +45,15 @@ builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<Pr
 // Pipeline Behavior
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
-// Заглушки сервисов
+// Р—Р°РіР»СѓС€РєРё СЃРµСЂРІРёСЃРѕРІ
 builder.Services.AddSingleton<IAccountRepository, AccountRepositoryStub>();
 builder.Services.AddSingleton<IClientService, ClientServiceStub>();
 builder.Services.AddSingleton<ICurrencyService, CurrencyServiceStub>();
 
+builder.Services.Configure<AccountServiceOptions>(builder.Configuration.GetSection("AccountService"));
+
 var app = builder.Build();
+
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

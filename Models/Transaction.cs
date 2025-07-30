@@ -1,4 +1,4 @@
-namespace AccountService.Models;
+﻿namespace AccountService.Models;
 
 public class Transaction
 {
@@ -7,9 +7,9 @@ public class Transaction
     public Guid? CounterpartyAccountId { get; set; }
     public decimal Amount { get; set; }
     public string Currency { get; set; } = string.Empty;
-    public TransactionType Type { get; set; }
+    public ETransactionType Type { get; set; }
     public string Description { get; set; } = string.Empty;
     public DateTime DateTime { get; set; }
 }
 
-public enum TransactionType { Credit, Debit }
+public enum ETransactionType { Credit, Debit }

@@ -1,12 +1,19 @@
-using AccountService.Models;
+Ôªøusing AccountService.Models;
 using System.Collections.Concurrent;
+using Microsoft.Extensions.Options;
+using AccountService.Configuration;
 
 namespace AccountService.Services
 {
     public class AccountRepositoryStub : IAccountRepository
     {
         private readonly ConcurrentDictionary<Guid, Account> _accounts = new();
-        private const int MaxInMemory = 1000;
+        private readonly int _maxInMemoryAccounts;
+
+        public AccountRepositoryStub(IOptions<AccountServiceOptions> options)
+        {
+            _maxInMemoryAccounts = options.Value.Memory.MaxInMemoryAccounts;
+        }
 
         public Task<Account?> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
@@ -18,7 +25,7 @@ namespace AccountService.Services
             int page,
             int size,
             Guid? ownerId = null,
-            AccountType? type = null,
+            EAccountType? type = null,
             CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
@@ -44,8 +51,8 @@ namespace AccountService.Services
         {
             ct.ThrowIfCancellationRequested();
 
-            if (_accounts.Count >= MaxInMemory)
-                throw new InvalidOperationException("—ÎË¯ÍÓÏ ÏÌÓ„Ó Ò˜ÂÚÓ‚, ÔÓÔÓ·ÛÈÚÂ ÔÓÁÊÂ");
+            if (_accounts.Count >= _maxInMemoryAccounts)
+                throw new InvalidOperationException("–°–ª–∏—à–∫–æ–º –º–Ω–æ–≥–æ —Å—á–µ—Ç–æ–≤, –ø–æ–ø—Ä–æ–±—É–π—Ç–µ –ø–æ–∑–∂–µ");
 
             account.Id = Guid.NewGuid();
             account.OpeningDate = DateTime.UtcNow;
@@ -58,7 +65,7 @@ namespace AccountService.Services
             ct.ThrowIfCancellationRequested();
 
             if (!_accounts.ContainsKey(account.Id))
-                throw new KeyNotFoundException("—˜ÂÚ ÌÂ Ì‡È‰ÂÌ");
+                throw new KeyNotFoundException("–°—á–µ—Ç –Ω–µ –Ω–∞–π–¥–µ–Ω");
 
             _accounts[account.Id] = account;
             return Task.CompletedTask;

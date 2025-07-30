@@ -1,10 +1,17 @@
+п»їusing System;
+using System.Threading;
+using System.Threading.Tasks;
+using MediatR;
+using Microsoft.Extensions.Options;
 using AccountService.Models;
 using AccountService.Services;
-using MediatR;
-
+using AccountService.Configuration;
 
 namespace AccountService.Handlers
 {
+    /// <summary>
+    /// РљРѕРјР°РЅРґР° РґР»СЏ РїРµСЂРµРІРѕРґР° СЃСЂРµРґСЃС‚РІ РјРµР¶РґСѓ СЃС‡РµС‚Р°РјРё
+    /// </summary>
     public sealed record TransferCommand(
         Guid FromAccountId,
         Guid ToAccountId,
@@ -12,81 +19,55 @@ namespace AccountService.Handlers
         string Description
     ) : IRequest<Unit>;
 
-    public class TransferHandler(
-        IAccountRepository repository,
-        ICurrencyService currencyService)
-        : IRequestHandler<TransferCommand, Unit>
+    /// <summary>
+    /// РћР±СЂР°Р±РѕС‚С‡РёРє РїРµСЂРµРІРѕРґР° СЃСЂРµРґСЃС‚РІ РјРµР¶РґСѓ СЃС‡РµС‚Р°РјРё
+    /// </summary>
+    public sealed class TransferHandler : IRequestHandler<TransferCommand, Unit>
     {
+        private readonly IAccountRepository _repository;
+        private readonly ICurrencyService _currencyService;
+        private readonly CommissionSettings _commissionSettings;
         private readonly SemaphoreSlim _semaphore = new(1, 1);
 
-        public async Task<Unit> Handle(TransferCommand request, CancellationToken ct)
+        public TransferHandler(
+            IAccountRepository repository,
+            ICurrencyService currencyService,
+            IOptions<AccountServiceOptions> options)
         {
-            var fromAccount = await repository.GetByIdAsync(request.FromAccountId, ct);
+            _repository = repository ?? throw new ArgumentNullException(nameof(repository));
+            _currencyService = currencyService ?? throw new ArgumentNullException(nameof(currencyService));
+            _commissionSettings = options?.Value?.Commission ?? throw new ArgumentNullException(nameof(options));
+        }
+
+        public async Task<Unit> Handle(TransferCommand request, CancellationToken cancellationToken)
+        {
+            if (request == null) throw new ArgumentNullException(nameof(request));
+
+            var fromAccount = await _repository.GetByIdAsync(request.FromAccountId, cancellationToken).ConfigureAwait(false);
             if (fromAccount == null)
-            {
-                throw new ArgumentException("Счет отправителя не найден");
-            }
+                throw new ArgumentException("РЎС‡РµС‚ РѕС‚РїСЂР°РІРёС‚РµР»СЏ РЅРµ РЅР°Р№РґРµРЅ", nameof(request.FromAccountId));
 
-            var toAccount = await repository.GetByIdAsync(request.ToAccountId, ct);
+            var toAccount = await _repository.GetByIdAsync(request.ToAccountId, cancellationToken).ConfigureAwait(false);
             if (toAccount == null)
-            {
-                throw new ArgumentException("Счет получателя не найден");
-            }
+                throw new ArgumentException("РЎС‡РµС‚ РїРѕР»СѓС‡Р°С‚РµР»СЏ РЅРµ РЅР°Р№РґРµРЅ", nameof(request.ToAccountId));
 
-            await _semaphore.WaitAsync(ct);
+            await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                if (fromAccount.ClosingDate.HasValue)
-                {
-                    throw new InvalidOperationException("Счет отправителя закрыт");
-                }
+                ValidateAccounts(fromAccount, toAccount);
 
-                if (toAccount.ClosingDate.HasValue)
-                {
-                    throw new InvalidOperationException("Счет получателя закрыт");
-                }
-
-                if (!fromAccount.Currency.Equals(toAccount.Currency, StringComparison.OrdinalIgnoreCase))
-                {
-                    throw new InvalidOperationException(
-                        $"Валюты счетов не совпадают: {fromAccount.Currency} vs {toAccount.Currency}");
-                }
-
-                if (!await currencyService.IsSupportedAsync(fromAccount.Currency, ct))
-                {
-                    throw new InvalidOperationException("Валюта не поддерживается");
-                }
+                if (!await _currencyService.IsSupportedAsync(fromAccount.Currency, cancellationToken).ConfigureAwait(false))
+                    throw new InvalidOperationException($"Р’Р°Р»СЋС‚Р° {fromAccount.Currency} РЅРµ РїРѕРґРґРµСЂР¶РёРІР°РµС‚СЃСЏ");
 
                 decimal commission = CalculateCommission(request.Amount);
                 decimal totalDebit = request.Amount + commission;
 
-                if (fromAccount.Balance < totalDebit && fromAccount.Type != AccountType.Credit)
-                {
-                    throw new InvalidOperationException(
-                        $"Недостаточно средств. Требуется: {totalDebit}, доступно: {fromAccount.Balance}");
-                }
+                ValidateBalance(fromAccount, totalDebit);
 
-                fromAccount.Balance -= totalDebit;
-                toAccount.Balance += request.Amount;
+                ExecuteTransfer(fromAccount, toAccount, request.Amount, commission, request.Description);
 
-                fromAccount.Transactions.Add(CreateTransaction(
-                    fromAccount,
-                    toAccount,
-                    request.Amount,
-                    commission,
-                    request.Description,
-                    TransactionType.Debit));
-
-                toAccount.Transactions.Add(CreateTransaction(
-                    toAccount,
-                    fromAccount,
-                    request.Amount,
-                    0,
-                    request.Description,
-                    TransactionType.Credit));
-
-                await repository.UpdateAsync(fromAccount, ct);
-                await repository.UpdateAsync(toAccount, ct);
+                await _repository.UpdateAsync(fromAccount, cancellationToken).ConfigureAwait(false);
+                await _repository.UpdateAsync(toAccount, cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -96,10 +77,61 @@ namespace AccountService.Handlers
             return Unit.Value;
         }
 
-        private static decimal CalculateCommission(decimal amount)
+        private void ValidateAccounts(Account fromAccount, Account toAccount)
         {
-            decimal commission = amount * 0.005m;
-            return Math.Clamp(commission, 10, 1000);
+            if (fromAccount.ClosingDate.HasValue)
+                throw new InvalidOperationException("РЎС‡РµС‚ РѕС‚РїСЂР°РІРёС‚РµР»СЏ Р·Р°РєСЂС‹С‚");
+
+            if (toAccount.ClosingDate.HasValue)
+                throw new InvalidOperationException("РЎС‡РµС‚ РїРѕР»СѓС‡Р°С‚РµР»СЏ Р·Р°РєСЂС‹С‚");
+
+            if (!string.Equals(fromAccount.Currency, toAccount.Currency, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(
+                    $"Р’Р°Р»СЋС‚С‹ СЃС‡РµС‚РѕРІ РЅРµ СЃРѕРІРїР°РґР°СЋС‚: {fromAccount.Currency} vs {toAccount.Currency}");
+            }
+        }
+
+        private void ValidateBalance(Account account, decimal requiredAmount)
+        {
+            if (account.Balance < requiredAmount && account.Type != EAccountType.Credit)
+            {
+                throw new InvalidOperationException(
+                    $"РќРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ СЃСЂРµРґСЃС‚РІ. РўСЂРµР±СѓРµС‚СЃСЏ: {requiredAmount}, РґРѕСЃС‚СѓРїРЅРѕ: {account.Balance}");
+            }
+        }
+
+        private void ExecuteTransfer(
+            Account fromAccount,
+            Account toAccount,
+            decimal amount,
+            decimal commission,
+            string description)
+        {
+            fromAccount.Balance -= amount + commission;
+            toAccount.Balance += amount;
+
+            fromAccount.Transactions.Add(CreateTransaction(
+                fromAccount,
+                toAccount,
+                amount,
+                commission,
+                description,
+                ETransactionType.Debit));
+
+            toAccount.Transactions.Add(CreateTransaction(
+                toAccount,
+                fromAccount,
+                amount,
+                0,
+                description,
+                ETransactionType.Credit));
+        }
+
+        private decimal CalculateCommission(decimal amount)
+        {
+            decimal commission = amount * _commissionSettings.Rate;
+            return Math.Clamp(commission, _commissionSettings.Min, _commissionSettings.Max);
         }
 
         private static Transaction CreateTransaction(
@@ -108,7 +140,7 @@ namespace AccountService.Handlers
             decimal amount,
             decimal commission,
             string description,
-            TransactionType type)
+            ETransactionType type)
         {
             return new Transaction
             {
@@ -119,7 +151,7 @@ namespace AccountService.Handlers
                 Currency = account.Currency,
                 Type = type,
                 Description = commission > 0
-                    ? $"{description} + комиссия {commission}"
+                    ? $"{description} + РєРѕРјРёСЃСЃРёСЏ {commission}"
                     : description,
                 DateTime = DateTime.UtcNow
             };

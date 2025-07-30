@@ -1,4 +1,4 @@
-using AccountService.Models;
+п»їusing AccountService.Models;
 using AccountService.Services;
 using FluentValidation;
 using MediatR;
@@ -34,16 +34,16 @@ namespace AccountService.Handlers
             var account = await _repository.GetByIdAsync(request.AccountId);
             if (account == null)
             {
-                throw new ArgumentException("Счет не найден");
+                throw new ArgumentException("РЎС‡РµС‚ РЅРµ РЅР°Р№РґРµРЅ");
             }
 
             request.PatchDoc.ApplyTo(account);
 
-            if (account.Type == AccountType.Deposit && account.InterestRate <= 0)
-                throw new InvalidOperationException("Для депозита ставка должна быть положительной");
+            if (account.Type == EAccountType.Deposit && account.InterestRate <= 0)
+                throw new InvalidOperationException("Р”Р»СЏ РґРµРїРѕР·РёС‚Р° СЃС‚Р°РІРєР° РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РїРѕР»РѕР¶РёС‚РµР»СЊРЅРѕР№");
 
-            if (account.Type == AccountType.Credit && account.InterestRate >= 0)
-                throw new InvalidOperationException("Для кредита ставка должна быть отрицательной");
+            if (account.Type == EAccountType.Credit && account.InterestRate >= 0)
+                throw new InvalidOperationException("Р”Р»СЏ РєСЂРµРґРёС‚Р° СЃС‚Р°РІРєР° РґРѕР»Р¶РЅР° Р±С‹С‚СЊ РѕС‚СЂРёС†Р°С‚РµР»СЊРЅРѕР№");
 
             await _repository.UpdateAsync(account);
             return Unit.Value;

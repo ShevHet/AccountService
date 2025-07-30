@@ -1,4 +1,4 @@
-using AccountService.Services;
+﻿using AccountService.Services;
 using MediatR;
 
 namespace AccountService.Handlers

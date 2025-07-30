@@ -53,3 +53,4 @@ C:\Users\erikh\source\repos\AccountService\obj\Debug\net9.0\refint\AccountServic
 C:\Users\erikh\source\repos\AccountService\obj\Debug\net9.0\AccountService.pdb
 C:\Users\erikh\source\repos\AccountService\obj\Debug\net9.0\AccountService.genruntimeconfig.cache
 C:\Users\erikh\source\repos\AccountService\obj\Debug\net9.0\ref\AccountService.dll
+C:\Users\erikh\source\repos\AccountService\obj\Debug\net9.0\AccountService.sourcelink.json
