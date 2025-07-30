@@ -1404,11 +1404,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\erikh\\source\\repos\\AccountService\\AccountService.csproj",
+      "projectUniqueName": "C:\\Users\\erikh\\OneDrive\\Рабочий стол\\AccountService\\AccountService.csproj",
       "projectName": "AccountService",
-      "projectPath": "C:\\Users\\erikh\\source\\repos\\AccountService\\AccountService.csproj",
+      "projectPath": "C:\\Users\\erikh\\OneDrive\\Рабочий стол\\AccountService\\AccountService.csproj",
       "packagesPath": "C:\\Users\\erikh\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\erikh\\source\\repos\\AccountService\\obj\\",
+      "outputPath": "C:\\Users\\erikh\\OneDrive\\Рабочий стол\\AccountService\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ti8+uxHX3p8=",
+  "dgSpecHash": "mCEurE+5+yw=",
   "success": true,
-  "projectFilePath": "C:\\Users\\erikh\\source\\repos\\AccountService\\AccountService.csproj",
+  "projectFilePath": "C:\\Users\\erikh\\OneDrive\\Рабочий стол\\AccountService\\AccountService.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\erikh\\.nuget\\packages\\fluentvalidation\\11.11.0\\fluentvalidation.11.11.0.nupkg.sha512",
     "C:\\Users\\erikh\\.nuget\\packages\\fluentvalidation.dependencyinjectionextensions\\11.11.0\\fluentvalidation.dependencyinjectionextensions.11.11.0.nupkg.sha512",
