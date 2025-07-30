@@ -15,12 +15,12 @@ namespace AccountService.Controllers
         public AccountsController(IMediator mediator) => _mediator = mediator;
 
         /// <summary>
-        /// Получить список счетов
+        /// РџРѕР»СѓС‡РёС‚СЊ СЃРїРёСЃРѕРє СЃС‡РµС‚РѕРІ
         /// </summary>
-        /// <param name="page">Номер страницы (начиная с 1)</param>
-        /// <param name="size">Количество на странице (1-100)</param>
-        /// <param name="ownerId">ID владельца счета</param>
-        /// <param name="type">Тип счета</param>
+        /// <param name="page">РќРѕРјРµСЂ СЃС‚СЂР°РЅРёС†С‹ (РЅР°С‡РёРЅР°СЏ СЃ 1)</param>
+        /// <param name="size">РљРѕР»РёС‡РµСЃС‚РІРѕ РЅР° СЃС‚СЂР°РЅРёС†Рµ (1-100)</param>
+        /// <param name="ownerId">ID РІР»Р°РґРµР»СЊС†Р° СЃС‡РµС‚Р°</param>
+        /// <param name="type">РўРёРї СЃС‡РµС‚Р°</param>
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(PagedResponse<Account>))]
         [ProducesResponseType(400)]
@@ -32,7 +32,7 @@ namespace AccountService.Controllers
             => Ok(await _mediator.Send(new GetAccountsQuery(page, size, ownerId, type)));
 
         /// <summary>
-        /// Поиск счетов (для длинных запросов)
+        /// РџРѕРёСЃРє СЃС‡РµС‚РѕРІ (РґР»СЏ РґР»РёРЅРЅС‹С… Р·Р°РїСЂРѕСЃРѕРІ)
         /// </summary>
         [HttpPost("search")]
         [ProducesResponseType(200, Type = typeof(PagedResponse<Account>))]
@@ -40,9 +40,9 @@ namespace AccountService.Controllers
             => Ok(await _mediator.Send(query));
 
         /// <summary>
-        /// Получить информацию о счете
+        /// РџРѕР»СѓС‡РёС‚СЊ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ СЃС‡РµС‚Рµ
         /// </summary>
-        /// <param name="id">Идентификатор счета</param>
+        /// <param name="id">РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‡РµС‚Р°</param>
         [HttpGet("{id:guid}")]
         [ProducesResponseType(200, Type = typeof(Account))]
         [ProducesResponseType(404)]
@@ -50,9 +50,9 @@ namespace AccountService.Controllers
             => Ok(await _mediator.Send(new GetAccountByIdQuery(id)));
 
         /// <summary>
-        /// Проверить наличие счетов у клиента
+        /// РџСЂРѕРІРµСЂРёС‚СЊ РЅР°Р»РёС‡РёРµ СЃС‡РµС‚РѕРІ Сѓ РєР»РёРµРЅС‚Р°
         /// </summary>
-        /// <param name="clientId">ID клиента</param>
+        /// <param name="clientId">ID РєР»РёРµРЅС‚Р°</param>
         [HttpGet("clients/{clientId:guid}/exists")]
         [ProducesResponseType(200, Type = typeof(bool))]
         [ProducesResponseType(400)]
@@ -60,9 +60,9 @@ namespace AccountService.Controllers
             => Ok(await _mediator.Send(new ClientHasAccountsQuery(clientId)));
 
         /// <summary>
-        /// Получить баланс счета
+        /// РџРѕР»СѓС‡РёС‚СЊ Р±Р°Р»Р°РЅСЃ СЃС‡РµС‚Р°
         /// </summary>
-        /// <param name="id">ID счета</param>
+        /// <param name="id">ID СЃС‡РµС‚Р°</param>
         [HttpGet("{id:guid}/balance")]
         [ProducesResponseType(200, Type = typeof(decimal))]
         [ProducesResponseType(404)]
@@ -73,7 +73,7 @@ namespace AccountService.Controllers
         }
 
         /// <summary>
-        /// Создать новый счет
+        /// РЎРѕР·РґР°С‚СЊ РЅРѕРІС‹Р№ СЃС‡РµС‚
         /// </summary>
         [HttpPost]
         [ProducesResponseType(200, Type = typeof(Guid))]
@@ -82,9 +82,9 @@ namespace AccountService.Controllers
             => Ok(await _mediator.Send(command));
 
         /// <summary>
-        /// Обновить информацию о счете
+        /// РћР±РЅРѕРІРёС‚СЊ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ СЃС‡РµС‚Рµ
         /// </summary>
-        /// <param name="id">Идентификатор счета</param>
+        /// <param name="id">РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‡РµС‚Р°</param>
         [HttpPut("{id:guid}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
@@ -93,7 +93,7 @@ namespace AccountService.Controllers
         {
             if (id != command.Id)
             {
-                return BadRequest("Идентификатор в URL не совпадает с телом запроса");
+                return BadRequest("РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РІ URL РЅРµ СЃРѕРІРїР°РґР°РµС‚ СЃ С‚РµР»РѕРј Р·Р°РїСЂРѕСЃР°");
             }
 
             await _mediator.Send(command);
@@ -101,10 +101,10 @@ namespace AccountService.Controllers
         }
 
         /// <summary>
-        /// Частичное обновление счета
+        /// Р§Р°СЃС‚РёС‡РЅРѕРµ РѕР±РЅРѕРІР»РµРЅРёРµ СЃС‡РµС‚Р°
         /// </summary>
-        /// <param name="id">ID счета</param>
-        /// <param name="patchDoc">JSON Patch документ</param>
+        /// <param name="id">ID СЃС‡РµС‚Р°</param>
+        /// <param name="patchDoc">JSON Patch РґРѕРєСѓРјРµРЅС‚</param>
         [HttpPatch("{id:guid}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
@@ -118,9 +118,9 @@ namespace AccountService.Controllers
         }
 
         /// <summary>
-        /// Закрыть счет
+        /// Р—Р°РєСЂС‹С‚СЊ СЃС‡РµС‚
         /// </summary>
-        /// <param name="id">Идентификатор счета</param>
+        /// <param name="id">РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‡РµС‚Р°</param>
         [HttpDelete("{id:guid}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
@@ -132,12 +132,12 @@ namespace AccountService.Controllers
         }
 
         /// <summary>
-        /// Получить выписку по счету
+        /// РџРѕР»СѓС‡РёС‚СЊ РІС‹РїРёСЃРєСѓ РїРѕ СЃС‡РµС‚Сѓ
         /// </summary>
-        /// <param name="id">Идентификатор счета</param>
-        /// <param name="from">Начало периода (опционально)</param>
-        /// <param name="to">Конец периода (опционально)</param>
-        /// <param name="format">Формат выписки (json/pdf)</param>
+        /// <param name="id">РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ СЃС‡РµС‚Р°</param>
+        /// <param name="from">РќР°С‡Р°Р»Рѕ РїРµСЂРёРѕРґР° (РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ)</param>
+        /// <param name="to">РљРѕРЅРµС† РїРµСЂРёРѕРґР° (РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ)</param>
+        /// <param name="format">Р¤РѕСЂРјР°С‚ РІС‹РїРёСЃРєРё (json/pdf)</param>
         [HttpGet("{id:guid}/statement")]
         [ProducesResponseType(200, Type = typeof(List<Transaction>))]
         [ProducesResponseType(200, Type = typeof(FileResult))]
