@@ -1,45 +1,77 @@
 ﻿using AccountService.Models;
 using AccountService.Services;
-using FluentValidation;
+using AccountService.Configuration;
 using MediatR;
 using Microsoft.Extensions.Options;
-using AccountService.Configuration;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace AccountService.Handlers
 {
-    public sealed record GetAccountsQuery(
-        int Page = 1,
-        int Size = 10,
-        Guid? OwnerId = null,
-        EAccountType? Type = null
-    ) : IRequest<PagedResponse<Account>>;
-
-    public class GetAccountsValidator : AbstractValidator<GetAccountsQuery>
+    public class GetAccountsQuery : IRequest<PagedResponse<Account>>
     {
-        public GetAccountsValidator(IOptions<AccountServiceOptions> options)
+        /// <summary>
+        /// Номер страницы (начиная с 1)
+        /// </summary>
+        public int Page { get; set; } = 1;
+
+        /// <summary>
+        /// Размер страницы (количество элементов)
+        /// </summary>
+        public int Size { get; set; } = 10;
+
+        /// <summary>
+        /// Фильтр по идентификатору владельца
+        /// </summary>
+        public Guid? OwnerId { get; set; } = null;
+
+        /// <summary>
+        /// Фильтр по типу счета
+        /// </summary>
+        public EAccountType? Type { get; set; } = null;
+
+        public GetAccountsQuery() { }
+
+        /// <summary>
+        /// Конструктор запроса
+        /// </summary>
+        /// <param name="page">Номер страницы</param>
+        /// <param name="size">Размер страницы</param>
+        /// <param name="ownerId">Фильтр по владельцу</param>
+        /// <param name="type">Фильтр по типу счета</param>
+        public GetAccountsQuery(int page, int size, Guid? ownerId, EAccountType? type)
         {
-            var settings = options.Value.Pagination;
-            RuleFor(x => x.Page)
-                .GreaterThan(0)
-                .WithMessage($"Номер страницы должен быть больше 0");
-            RuleFor(x => x.Size)
-                .InclusiveBetween(settings.MinPageSize, settings.MaxPageSize)
-                .WithMessage($"Размер страницы должен быть от {settings.MinPageSize} до {settings.MaxPageSize}");
+            Page = page;
+            Size = size;
+            OwnerId = ownerId;
+            Type = type;
         }
     }
 
-    public class GetAccountsHandler : IRequestHandler<GetAccountsQuery, PagedResponse<Account>>
+    public sealed class GetAccountsHandler : IRequestHandler<GetAccountsQuery, PagedResponse<Account>>
     {
         private readonly IAccountRepository _repo;
+        private readonly IOptions<AccountServiceOptions> _options;
 
-        public GetAccountsHandler(IAccountRepository repo)
+        public GetAccountsHandler(IAccountRepository repo, IOptions<AccountServiceOptions> options)
         {
             _repo = repo;
+            _options = options;
         }
 
         public async Task<PagedResponse<Account>> Handle(GetAccountsQuery req, CancellationToken ct)
         {
-            return await _repo.GetAccountsAsync(req.Page, req.Size, req.OwnerId, req.Type);
+            if (req.Page < 1) req.Page = 1;
+            if (req.Size < 1 || req.Size > _options.Value.Pagination.MaxPageSize)
+                req.Size = _options.Value.Pagination.MaxPageSize;
+
+            var result = await _repo.GetAccountsAsync(req.Page, req.Size, req.OwnerId, req.Type, ct);
+            return new PagedResponse<Account>(
+                result.Items,
+                req.Page,
+                req.Size,
+                result.TotalCount
+            );
         }
     }
 }

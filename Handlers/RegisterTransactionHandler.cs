@@ -7,13 +7,35 @@ using AccountService.Configuration;
 
 namespace AccountService.Handlers
 {
+    /// <summary>
+    /// Команда регистрации транзакции
+    /// </summary>
     public sealed record RegisterTransactionCommand(
-    Guid AccountId,
-    decimal Amount,
-    string Currency,
-    ETransactionType Type,
-    string Description
-) : IRequest<Unit>;
+        /// <summary>
+        /// Идентификатор счета
+        /// </summary>
+        Guid AccountId,
+
+        /// <summary>
+        /// Сумма транзакции
+        /// </summary>
+        decimal Amount,
+
+        /// <summary>
+        /// Валюта транзакции (ISO 4217)
+        /// </summary>
+        string Currency,
+
+        /// <summary>
+        /// Тип транзакции (Credit/Debit)
+        /// </summary>
+        ETransactionType Type,
+
+        /// <summary>
+        /// Описание транзакции
+        /// </summary>
+        string Description
+    ) : IRequest<Unit>;
 
     public class RegisterTransactionValidator : AbstractValidator<RegisterTransactionCommand>
     {

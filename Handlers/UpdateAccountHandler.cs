@@ -5,11 +5,28 @@ using MediatR;
 
 namespace AccountService.Handlers
 {
+    /// <summary>
+    /// Команда обновления счета
+    /// </summary>
+    /// <param name="Id">Идентификатор обновляемого счета</param>
+    /// <param name="InterestRate">Новая процентная ставка</param>
+    /// <param name="ClosingDate">Новая дата закрытия счета</param>
     public sealed record UpdateAccountCommand(
+    /// <summary>
+    /// Идентификатор обновляемого счета
+    /// </summary>
     Guid Id,
+
+    /// <summary>
+    /// Новая процентная ставка
+    /// </summary>
     decimal? InterestRate,
+
+    /// <summary>
+    /// Новая дата закрытия счета
+    /// </summary>
     DateTime? ClosingDate
-) : IRequest<Unit>; 
+    ) : IRequest<Unit>;
 
     public class UpdateAccountValidator : AbstractValidator<UpdateAccountCommand>
     {

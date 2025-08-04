@@ -7,9 +7,23 @@ using Microsoft.Extensions.Options;
 
 namespace AccountService.Handlers
 {
+    /// <summary>
+    /// Запрос получения списка транзакций
+    /// </summary>
     public sealed record GetTransactionsQuery(
+        /// <summary>
+        /// Фильтр по идентификатору счета (опционально)
+        /// </summary>
         Guid? AccountId = null,
+
+        /// <summary>
+        /// Номер страницы
+        /// </summary>
         int Page = 1,
+
+        /// <summary>
+        /// Размер страницы
+        /// </summary>
         int Size = 10
     ) : IRequest<PagedResponse<Transaction>>;
 

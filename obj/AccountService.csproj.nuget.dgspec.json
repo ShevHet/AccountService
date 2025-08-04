@@ -36,6 +36,10 @@
           }
         },
         "warningProperties": {
+          "noWarn": [
+            "NU1504",
+            "NU1608"
+          ],
           "warnAsError": [
             "NU1605"
           ]
@@ -51,33 +55,53 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "dependencies": {
+            "AspNetCore.HealthChecks.System": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
             "FluentValidation": {
               "target": "Package",
-              "version": "[11.11.0, )"
+              "version": "[11.9.0, )"
             },
-            "FluentValidation.DependencyInjectionExtensions": {
+            "FluentValidation.AspNetCore": {
               "target": "Package",
-              "version": "[11.11.0, )"
+              "version": "[11.3.0, )"
+            },
+            "JetBrains.Annotations": {
+              "target": "Package",
+              "version": "[2025.2.0, )"
             },
             "MediatR": {
               "target": "Package",
-              "version": "[12.1.1, )"
+              "version": "[11.1.0, )"
             },
-            "Microsoft.AspNetCore.Mvc.NewtonsoftJson": {
+            "MediatR.Extensions.Microsoft.DependencyInjection": {
+              "target": "Package",
+              "version": "[11.1.0, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.AspNetCore.JsonPatch": {
+              "target": "Package",
+              "version": "[9.0.0, )"
+            },
+            "Microsoft.Extensions.Diagnostics.HealthChecks": {
               "target": "Package",
               "version": "[9.0.7, )"
             },
-            "Microsoft.AspNetCore.OpenApi": {
+            "Microsoft.IdentityModel.Tokens": {
               "target": "Package",
-              "version": "[9.0.7, )"
-            },
-            "Microsoft.EntityFrameworkCore.InMemory": {
-              "target": "Package",
-              "version": "[9.0.7, )"
+              "version": "[8.0.1, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[6.5.0, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.0.1, )"
             }
           },
           "imports": [

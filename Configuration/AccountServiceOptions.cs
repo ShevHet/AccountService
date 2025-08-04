@@ -23,7 +23,10 @@ namespace AccountService.Configuration
 		public decimal Rate { get; set; } = 0.005m;
 		public decimal Min { get; set; } = 10;
 		public decimal Max { get; set; } = 1000;
-	}
+
+        public decimal MinDepositRate { get; set; } = 0.01m;
+        public decimal MaxCreditRate { get; set; } = -0.01m;
+    }
 
 	public class ValidationSettings
 	{

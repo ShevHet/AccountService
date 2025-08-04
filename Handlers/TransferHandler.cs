@@ -10,12 +10,27 @@ using AccountService.Configuration;
 namespace AccountService.Handlers
 {
     /// <summary>
-    /// Команда для перевода средств между счетами
+    /// Команда перевода средств между счетами
     /// </summary>
     public sealed record TransferCommand(
+        /// <summary>
+        /// Идентификатор счета отправителя
+        /// </summary>
         Guid FromAccountId,
+
+        /// <summary>
+        /// Идентификатор счета получателя
+        /// </summary>
         Guid ToAccountId,
+
+        /// <summary>
+        /// Сумма перевода
+        /// </summary>
         decimal Amount,
+
+        /// <summary>
+        /// Описание перевода
+        /// </summary>
         string Description
     ) : IRequest<Unit>;
 

@@ -1,14 +1,18 @@
-﻿using AccountService.Models;
-using System.Collections.Concurrent;
+﻿using AccountService.Configuration;
+using AccountService.Models;
 using Microsoft.Extensions.Options;
-using AccountService.Configuration;
+using System.Collections.Concurrent;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace AccountService.Services
 {
-    public class AccountRepositoryStub : IAccountRepository
+    public sealed class AccountRepositoryStub : IAccountRepository
     {
         private readonly ConcurrentDictionary<Guid, Account> _accounts = new();
         private readonly int _maxInMemoryAccounts;
+        private bool _isHealthy = true;
 
         public AccountRepositoryStub(IOptions<AccountServiceOptions> options)
         {
@@ -18,7 +22,7 @@ namespace AccountService.Services
         public Task<Account?> GetByIdAsync(Guid id, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
-            return Task.FromResult(_accounts.GetValueOrDefault(id));
+            return Task.FromResult(_accounts.TryGetValue(id, out var account) ? account : null);
         }
 
         public Task<PagedResponse<Account>> GetAccountsAsync(
@@ -30,13 +34,17 @@ namespace AccountService.Services
         {
             ct.ThrowIfCancellationRequested();
 
-            var query = _accounts.Values.AsQueryable();
+            var query = _accounts.Values.AsEnumerable();
 
             if (ownerId.HasValue)
+            {
                 query = query.Where(a => a.OwnerId == ownerId.Value);
+            }
 
             if (type.HasValue)
+            {
                 query = query.Where(a => a.Type == type.Value);
+            }
 
             var total = query.Count();
             var items = query
@@ -52,7 +60,9 @@ namespace AccountService.Services
             ct.ThrowIfCancellationRequested();
 
             if (_accounts.Count >= _maxInMemoryAccounts)
+            {
                 throw new InvalidOperationException("Слишком много счетов, попробуйте позже");
+            }
 
             account.Id = Guid.NewGuid();
             account.OpeningDate = DateTime.UtcNow;
@@ -65,7 +75,9 @@ namespace AccountService.Services
             ct.ThrowIfCancellationRequested();
 
             if (!_accounts.ContainsKey(account.Id))
+            {
                 throw new KeyNotFoundException("Счет не найден");
+            }
 
             _accounts[account.Id] = account;
             return Task.CompletedTask;
@@ -85,12 +97,12 @@ namespace AccountService.Services
         public Task<bool> ClientHasAccountsAsync(Guid clientId, CancellationToken ct = default)
         {
             ct.ThrowIfCancellationRequested();
+            return Task.FromResult(_accounts.Values.Any(a => a.OwnerId == clientId && !a.ClosingDate.HasValue));
+        }
 
-            return Task.FromResult(
-                _accounts.Values.Any(a =>
-                    a.OwnerId == clientId &&
-                    !a.ClosingDate.HasValue)
-            );
+        public Task<bool> CheckHealthAsync()
+        {
+            return Task.FromResult(_isHealthy);
         }
     }
 }

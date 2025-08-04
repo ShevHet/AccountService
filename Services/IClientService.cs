@@ -2,6 +2,6 @@
 {
     public interface IClientService
     {
-        Task<bool> VerifyClientAsync(Guid clientId);
+        Task<bool> VerifyClientAsync(Guid clientId, CancellationToken ct = default);
     }
 }

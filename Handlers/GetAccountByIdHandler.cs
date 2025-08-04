@@ -4,7 +4,16 @@ using MediatR;
 
 namespace AccountService.Handlers
 {
-    public sealed record GetAccountByIdQuery(Guid AccountId) : IRequest<Account>;
+    /// <summary>
+    /// Запрос получения счета по идентификатору
+    /// </summary>
+    /// <param name="AccountId">Идентификатор счета</param>
+    public sealed record GetAccountByIdQuery(
+        /// <summary>
+        /// Идентификатор счета
+        /// </summary>
+        Guid AccountId
+    ) : IRequest<Account>;
 
     public class GetAccountByIdHandler : IRequestHandler<GetAccountByIdQuery, Account>
     {

@@ -6,10 +6,22 @@ using Microsoft.AspNetCore.JsonPatch;
 
 namespace AccountService.Handlers
 {
+    /// <summary>
+    /// Команда частичного обновления счета
+    /// </summary>
+    /// <param name="AccountId">Идентификатор счета</param>
+    /// <param name="PatchDoc">JSON Patch документ с изменениями</param>
     public sealed record PatchAccountCommand(
-    Guid AccountId,
-    JsonPatchDocument<Account> PatchDoc
-) : IRequest<Unit>; 
+        /// <summary>
+        /// Идентификатор счета
+        /// </summary>
+        Guid AccountId,
+
+        /// <summary>
+        /// JSON Patch документ с изменениями
+        /// </summary>
+        JsonPatchDocument<Account> PatchDoc
+    ) : IRequest<Unit>;
 
     public class PatchAccountValidator : AbstractValidator<PatchAccountCommand>
     {

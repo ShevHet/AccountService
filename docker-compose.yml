@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  account-service:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: account-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      - keycloak
+    environment:
+      - Jwt__Authority=http://keycloak:8081/realms/master
+      - Jwt__Audience=account-service
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  account-db:
+    image: postgres:16-alpine
+    container_name: account-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: accounts
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: keycloak
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    command: ["start-dev", "--http-port=8080"]
+    ports:
+    - "8080:8080"
+
+volumes:
+  pgdata:

@@ -3,7 +3,15 @@ using MediatR;
 
 namespace AccountService.Handlers
 {
-    public sealed record DeleteAccountCommand(Guid AccountId) : IRequest<Unit>; // Изменено
+    /// <summary>
+    /// Команда удаления счета
+    /// </summary>
+    public sealed record DeleteAccountCommand(
+        /// <summary>
+        /// Идентификатор удаляемого счета
+        /// </summary>
+        Guid AccountId
+    ) : IRequest<Unit>;
 
     public class DeleteAccountHandler : IRequestHandler<DeleteAccountCommand, Unit> // Добавлен Unit
     {

@@ -1,37 +1,74 @@
 ﻿using AccountService.Models;
 using AccountService.Services;
+using AccountService.Configuration;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Options;
-using AccountService.Configuration;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace AccountService.Handlers
 {
+
+    /// <summary>
+    /// Команда создания счета
+    /// </summary>
     public sealed record CreateAccountCommand(
+        /// <summary>
+        /// Идентификатор владельца счета
+        /// </summary>
         Guid OwnerId,
+
+        /// <summary>
+        /// Тип счета
+        /// </summary>
         EAccountType Type,
+
+        /// <summary>
+        /// Валюта счета (ISO 4217 код)
+        /// </summary>
         string Currency,
+
+        /// <summary>
+        /// Процентная ставка (для депозитных и кредитных счетов)
+        /// </summary>
         decimal? InterestRate,
+
+        /// <summary>
+        /// Дата открытия счета (если не указана, используется текущая дата)
+        /// </summary>
         DateTime? OpeningDate = null,
+
+        /// <summary>
+        /// Дата закрытия счета (если не указана, счет считается открытым)
+        /// </summary>
         DateTime? ClosingDate = null
     ) : IRequest<Guid>;
 
-    public class CreateAccountValidator : AbstractValidator<CreateAccountCommand>
+    public sealed class CreateAccountValidator : AbstractValidator<CreateAccountCommand>
     {
+        private const decimal MinDepositRate = 0.01m;
+        private const decimal MaxCreditRate = -0.01m;
+
         public CreateAccountValidator(
             IClientService clientService,
             ICurrencyService currencyService,
             IOptions<AccountServiceOptions> options)
         {
-            const decimal minDepositRate = 0.01m;
-            const decimal maxCreditRate = -0.01m;
+            var settings = options.Value.Commission;
 
             RuleFor(x => x.OwnerId)
-                .MustAsync(async (id, _) => await clientService.VerifyClientAsync(id))
+                .MustAsync(async (id, ct) =>
+                {
+                    return await clientService.VerifyClientAsync(id);
+                })
                 .WithMessage("Клиент не существует");
 
             RuleFor(x => x.Currency)
-                .MustAsync(async (c, _) => await currencyService.IsSupportedAsync(c))
+                .MustAsync(async (c, ct) =>
+                {
+                    return await currencyService.IsSupportedAsync(c, ct);
+                })
                 .WithMessage("Неподдерживаемая валюта");
 
             RuleFor(x => x.InterestRate)
@@ -39,13 +76,11 @@ namespace AccountService.Handlers
                 .When(x => x.Type is EAccountType.Deposit or EAccountType.Credit);
 
             RuleFor(x => x.InterestRate)
-                .GreaterThan(minDepositRate)
-                .WithMessage($"Ставка должна быть > {minDepositRate}")
+                .GreaterThan(MinDepositRate).WithMessage($"Ставка должна быть > {MinDepositRate}")
                 .When(x => x.Type == EAccountType.Deposit);
 
             RuleFor(x => x.InterestRate)
-                .LessThan(maxCreditRate)
-                .WithMessage($"Ставка должна быть < {maxCreditRate}")
+                .LessThan(MaxCreditRate).WithMessage($"Ставка должна быть < {MaxCreditRate}")
                 .When(x => x.Type == EAccountType.Credit);
 
             RuleFor(x => x.OpeningDate)
@@ -60,7 +95,7 @@ namespace AccountService.Handlers
         }
     }
 
-    public class CreateAccountHandler : IRequestHandler<CreateAccountCommand, Guid>
+    public sealed class CreateAccountHandler : IRequestHandler<CreateAccountCommand, Guid>
     {
         private readonly IAccountRepository _repository;
 
@@ -69,20 +104,18 @@ namespace AccountService.Handlers
             _repository = repository;
         }
 
-        public async Task<Guid> Handle(CreateAccountCommand request, CancellationToken ct)
+        public async Task<Guid> Handle(CreateAccountCommand request, CancellationToken cancellationToken)
         {
-            var account = new Account
-            {
-                OwnerId = request.OwnerId,
-                Type = request.Type,
-                Currency = request.Currency,
-                InterestRate = request.InterestRate,
-                OpeningDate = request.OpeningDate ?? DateTime.UtcNow,
-                ClosingDate = request.ClosingDate,
-                Balance = 0
-            };
+            var account = new Account();
+            account.OwnerId = request.OwnerId;
+            account.Type = request.Type;
+            account.Currency = request.Currency;
+            account.InterestRate = request.InterestRate;
+            account.OpeningDate = request.OpeningDate ?? DateTime.UtcNow;
+            account.ClosingDate = request.ClosingDate;
+            account.Balance = 0;
 
-            var created = await _repository.CreateAsync(account, ct);
+            var created = await _repository.CreateAsync(account, cancellationToken);
             return created.Id;
         }
     }

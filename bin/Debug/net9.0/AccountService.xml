@@ -1,0 +1,456 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AccountService</name>
+    </assembly>
+    <members>
+        <member name="M:AccountService.Controllers.AccountsController.GetAccounts(System.Int32,System.Int32,System.Nullable{System.Guid},System.Nullable{AccountService.Models.EAccountType})">
+            <summary>
+            Получение списка счетов с пагинацией
+            </summary>
+            <param name="page">Номер страницы (начиная с 1)</param>
+            <param name="size">Размер страницы (количество элементов)</param>
+            <param name="ownerId">Фильтр по идентификатору владельца</param>
+            <param name="type">Фильтр по типу счета</param>
+            <response code="200">Успешно возвращен список счетов</response>
+            <response code="500">Внутренняя ошибка сервера</response>
+        </member>
+        <!-- Badly formed XML comment ignored for member M:AccountService.Controllers.AccountsController.SearchAccounts(AccountService.Handlers.GetAccountsQuery) -->
+        <member name="M:AccountService.Controllers.AccountsController.GetAccountById(System.Guid)">
+            <summary>
+            Получение счета по идентификатору
+            </summary>
+            <param name="id">Идентификатор счета</param>
+            <response code="200">Успешно возвращен счет</response>
+            <response code="404">Счет не найден</response>
+            <response code="500">Внутренняя ошибка сервера</response>
+        </member>
+        <member name="M:AccountService.Controllers.AccountsController.ClientHasAccounts(System.Guid)">
+            <summary>
+            Проверка наличия счетов у клиента
+            </summary>
+            <param name="clientId">Идентификатор клиента</param>
+            <response code="200">Успешно выполнена проверка</response>
+            <response code="500">Внутренняя ошибка сервера</response>
+        </member>
+        <!-- Badly formed XML comment ignored for member M:AccountService.Controllers.AccountsController.GetBalance(System.Guid)" -->
+        <member name="M:AccountService.Controllers.AccountsController.CreateAccount(AccountService.Handlers.CreateAccountCommand)">
+            <summary>
+            Создание нового счета
+            </summary>
+            <param name="command">Данные для создания счета</param>
+            <response code="200">ID созданного счета</response>
+            <response code="400">Ошибки валидации</response>
+            <response code="500">Внутренняя ошибка сервера</response>
+        </member>
+        <member name="M:AccountService.Controllers.AccountsController.UpdateAccount(System.Guid,AccountService.Handlers.UpdateAccountCommand)">
+            <summary>
+            Обновление счета
+            </summary>
+            <param name="id">Идентификатор счета</param>
+            <param name="command">Данные для обновления</param>
+            <response code="204">Счет успешно обновлен</response>
+            <response code="400">Неверные параметры запроса</response>
+            <response code="404">Счет не найден</response>
+            <response code="500">Внутренняя ошибка сервера</response>
+        </member>
+        <member name="M:AccountService.Controllers.AccountsController.PatchAccount(System.Guid,Microsoft.AspNetCore.JsonPatch.JsonPatchDocument{AccountService.Models.Account})">
+            <summary>
+            Частичное обновление счета
+            </summary>
+            <param name="id">Идентификатор счета</param>
+            <param name="patchDoc">JSON Patch документ</param>
+            <response code="204">Счет успешно обновлен</response>
+            <response code="400">Неверный формат запроса</response>
+            <response code="404">Счет не найден</response>
+            <response code="500">Внутренняя ошибка сервера</response>
+        </member>
+        <member name="M:AccountService.Controllers.AccountsController.DeleteAccount(System.Guid)">
+            <summary>
+            Удаление счета
+            </summary>
+            <param name="id">Идентификатор счета</param>
+            <response code="204">Счет успешно удален</response>
+            <response code="400">Невозможно удалить счет</response>
+            <response code="404">Счет не найден</response>
+            <response code="500">Внутренняя ошибка сервера</response>
+        </member>
+        <member name="M:AccountService.Controllers.AccountsController.GetStatement(System.Guid,System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            Получение выписки по счету
+            </summary>
+            <param name="id">Идентификатор счета</param>
+            <param name="from">Начальная дата периода (опционально)</param>
+            <param name="to">Конечная дата периода (опционально)</param>
+            <response code="200">Успешно возвращена выписка</response>
+            <response code="404">Счет не найден</response>
+            <response code="500">Внутренняя ошибка сервера</response>
+        </member>
+        <member name="M:AccountService.Controllers.TransactionsController.RegisterTransaction(AccountService.Handlers.RegisterTransactionCommand)">
+            <summary>
+            Регистрация операции по счету
+            </summary>
+            <param name="command">Данные операции</param>
+            <response code="204">Операция успешно зарегистрирована</response>
+            <response code="400">Ошибка валидации или бизнес-правила</response>
+        </member>
+        <member name="M:AccountService.Controllers.TransactionsController.GetTransactions(System.Nullable{System.Guid},System.Int32,System.Int32)">
+            <summary>
+            Получение списка транзакций
+            </summary>
+            <param name="accountId">Фильтр по идентификатору счета (опционально)</param>
+            <param name="page">Номер страницы</param>
+            <param name="size">Размер страницы</param>
+            <response code="200">Успешно возвращен список транзакций</response>
+        </member>
+        <member name="M:AccountService.Controllers.TransfersController.Transfer(AccountService.Handlers.TransferCommand)">
+            <summary>
+            Выполнение перевода между счетами
+            </summary>
+            <param name="command">Данные для перевода</param>
+            <response code="204">Перевод успешно выполнен</response>
+            <response code="400">Ошибка валидации или бизнес-правила</response>
+        </member>
+        <member name="T:AccountService.Handlers.ClientHasAccountsQuery">
+            <summary>
+            Запрос проверки наличия счетов у клиента
+            </summary>
+        </member>
+        <member name="M:AccountService.Handlers.ClientHasAccountsQuery.#ctor(System.Guid)">
+            <summary>
+            Запрос проверки наличия счетов у клиента
+            </summary>
+        </member>
+        <member name="T:AccountService.Handlers.CreateAccountCommand">
+            <summary>
+            Команда создания счета
+            </summary>
+        </member>
+        <member name="M:AccountService.Handlers.CreateAccountCommand.#ctor(System.Guid,AccountService.Models.EAccountType,System.String,System.Nullable{System.Decimal},System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            Команда создания счета
+            </summary>
+        </member>
+        <member name="T:AccountService.Handlers.DeleteAccountCommand">
+            <summary>
+            Команда удаления счета
+            </summary>
+        </member>
+        <member name="M:AccountService.Handlers.DeleteAccountCommand.#ctor(System.Guid)">
+            <summary>
+            Команда удаления счета
+            </summary>
+        </member>
+        <member name="T:AccountService.Handlers.GetAccountByIdQuery">
+            <summary>
+            Запрос получения счета по идентификатору
+            </summary>
+            <param name="AccountId">Идентификатор счета</param>
+        </member>
+        <member name="M:AccountService.Handlers.GetAccountByIdQuery.#ctor(System.Guid)">
+            <summary>
+            Запрос получения счета по идентификатору
+            </summary>
+            <param name="AccountId">Идентификатор счета</param>
+        </member>
+        <member name="P:AccountService.Handlers.GetAccountByIdQuery.AccountId">
+            <summary>Идентификатор счета</summary>
+        </member>
+        <member name="P:AccountService.Handlers.GetAccountsQuery.Page">
+            <summary>
+            Номер страницы (начиная с 1)
+            </summary>
+        </member>
+        <member name="P:AccountService.Handlers.GetAccountsQuery.Size">
+            <summary>
+            Размер страницы (количество элементов)
+            </summary>
+        </member>
+        <member name="P:AccountService.Handlers.GetAccountsQuery.OwnerId">
+            <summary>
+            Фильтр по идентификатору владельца
+            </summary>
+        </member>
+        <member name="P:AccountService.Handlers.GetAccountsQuery.Type">
+            <summary>
+            Фильтр по типу счета
+            </summary>
+        </member>
+        <member name="M:AccountService.Handlers.GetAccountsQuery.#ctor(System.Int32,System.Int32,System.Nullable{System.Guid},System.Nullable{AccountService.Models.EAccountType})">
+            <summary>
+            Конструктор запроса
+            </summary>
+            <param name="page">Номер страницы</param>
+            <param name="size">Размер страницы</param>
+            <param name="ownerId">Фильтр по владельцу</param>
+            <param name="type">Фильтр по типу счета</param>
+        </member>
+        <member name="T:AccountService.Handlers.GetStatementQuery">
+            <summary>
+            Запрос получения выписки по счету
+            </summary>
+        </member>
+        <member name="M:AccountService.Handlers.GetStatementQuery.#ctor(System.Guid,System.Nullable{System.DateTime},System.Nullable{System.DateTime})">
+            <summary>
+            Запрос получения выписки по счету
+            </summary>
+        </member>
+        <member name="T:AccountService.Handlers.GetTransactionsQuery">
+            <summary>
+            Запрос получения списка транзакций
+            </summary>
+        </member>
+        <member name="M:AccountService.Handlers.GetTransactionsQuery.#ctor(System.Nullable{System.Guid},System.Int32,System.Int32)">
+            <summary>
+            Запрос получения списка транзакций
+            </summary>
+        </member>
+        <member name="T:AccountService.Handlers.PatchAccountCommand">
+            <summary>
+            Команда частичного обновления счета
+            </summary>
+            <param name="AccountId">Идентификатор счета</param>
+            <param name="PatchDoc">JSON Patch документ с изменениями</param>
+        </member>
+        <member name="M:AccountService.Handlers.PatchAccountCommand.#ctor(System.Guid,Microsoft.AspNetCore.JsonPatch.JsonPatchDocument{AccountService.Models.Account})">
+            <summary>
+            Команда частичного обновления счета
+            </summary>
+            <param name="AccountId">Идентификатор счета</param>
+            <param name="PatchDoc">JSON Patch документ с изменениями</param>
+        </member>
+        <member name="P:AccountService.Handlers.PatchAccountCommand.AccountId">
+            <summary>Идентификатор счета</summary>
+        </member>
+        <member name="P:AccountService.Handlers.PatchAccountCommand.PatchDoc">
+            <summary>JSON Patch документ с изменениями</summary>
+        </member>
+        <member name="T:AccountService.Handlers.RegisterTransactionCommand">
+            <summary>
+            Команда регистрации транзакции
+            </summary>
+        </member>
+        <member name="M:AccountService.Handlers.RegisterTransactionCommand.#ctor(System.Guid,System.Decimal,System.String,AccountService.Models.ETransactionType,System.String)">
+            <summary>
+            Команда регистрации транзакции
+            </summary>
+        </member>
+        <member name="T:AccountService.Handlers.TransferCommand">
+            <summary>
+            Команда перевода средств между счетами
+            </summary>
+        </member>
+        <member name="M:AccountService.Handlers.TransferCommand.#ctor(System.Guid,System.Guid,System.Decimal,System.String)">
+            <summary>
+            Команда перевода средств между счетами
+            </summary>
+        </member>
+        <member name="T:AccountService.Handlers.TransferHandler">
+            <summary>
+            Обработчик перевода средств между счетами
+            </summary>
+        </member>
+        <member name="T:AccountService.Handlers.UpdateAccountCommand">
+            <summary>
+            Команда обновления счета
+            </summary>
+            <param name="Id">Идентификатор обновляемого счета</param>
+            <param name="InterestRate">Новая процентная ставка</param>
+            <param name="ClosingDate">Новая дата закрытия счета</param>
+        </member>
+        <member name="M:AccountService.Handlers.UpdateAccountCommand.#ctor(System.Guid,System.Nullable{System.Decimal},System.Nullable{System.DateTime})">
+            <summary>
+            Команда обновления счета
+            </summary>
+            <param name="Id">Идентификатор обновляемого счета</param>
+            <param name="InterestRate">Новая процентная ставка</param>
+            <param name="ClosingDate">Новая дата закрытия счета</param>
+        </member>
+        <member name="P:AccountService.Handlers.UpdateAccountCommand.Id">
+            <summary>Идентификатор обновляемого счета</summary>
+        </member>
+        <member name="P:AccountService.Handlers.UpdateAccountCommand.InterestRate">
+            <summary>Новая процентная ставка</summary>
+        </member>
+        <member name="P:AccountService.Handlers.UpdateAccountCommand.ClosingDate">
+            <summary>Новая дата закрытия счета</summary>
+        </member>
+        <member name="T:AccountService.Models.Account">
+            <summary>
+            Представляет банковский счет
+            </summary>
+        </member>
+        <member name="P:AccountService.Models.Account.Id">
+            <summary>
+            Уникальный идентификатор счета
+            </summary>
+        </member>
+        <member name="P:AccountService.Models.Account.OwnerId">
+            <summary>
+            Идентификатор владельца счета
+            </summary>
+        </member>
+        <member name="P:AccountService.Models.Account.Type">
+            <summary>
+            Тип счета (Текущий, Депозитный, Кредитный)
+            </summary>
+        </member>
+        <member name="P:AccountService.Models.Account.Currency">
+            <summary>
+            Валюта счета (ISO 4217 код)
+            </summary>
+        </member>
+        <member name="P:AccountService.Models.Account.Balance">
+            <summary>
+            Текущий баланс счета
+            </summary>
+        </member>
+        <member name="P:AccountService.Models.Account.InterestRate">
+            <summary>
+            Процентная ставка (для депозитных и кредитных счетов)
+            </summary>
+        </member>
+        <member name="P:AccountService.Models.Account.OpeningDate">
+            <summary>
+            Дата открытия счета
+            </summary>
+        </member>
+        <member name="P:AccountService.Models.Account.ClosingDate">
+            <summary>
+            Дата закрытия счета (если счет закрыт)
+            </summary>
+        </member>
+        <member name="P:AccountService.Models.Account.Transactions">
+            <summary>
+            Список транзакций по счету
+            </summary>
+        </member>
+        <member name="T:AccountService.Models.EAccountType">
+            <summary>
+            Типы банковских счетов
+            </summary>
+        </member>
+        <member name="F:AccountService.Models.EAccountType.Checking">
+            <summary>
+            Текущий счет
+            </summary>
+        </member>
+        <member name="F:AccountService.Models.EAccountType.Deposit">
+            <summary>
+            Депозитный счет
+            </summary>
+        </member>
+        <member name="F:AccountService.Models.EAccountType.Credit">
+            <summary>
+            Кредитный счет
+            </summary>
+        </member>
+        <member name="T:AccountService.Models.MbResult`1">
+            <summary>
+            Результат операции, содержащий либо значение, либо ошибку
+            </summary>
+            <typeparam name="T">Тип возвращаемого значения</typeparam>
+        </member>
+        <member name="M:AccountService.Models.MbResult`1.#ctor(`0,AccountService.Models.MbError)">
+            <summary>
+            Результат операции, содержащий либо значение, либо ошибку
+            </summary>
+            <typeparam name="T">Тип возвращаемого значения</typeparam>
+        </member>
+        <member name="P:AccountService.Models.MbResult`1.IsSuccess">
+            <summary>
+            Признак успешного выполнения операции
+            </summary>
+        </member>
+        <member name="M:AccountService.Models.MbResult`1.Success(`0)">
+            <summary>
+            Создает успешный результат
+            </summary>
+            <param name="value">Результат операции</param>
+        </member>
+        <member name="M:AccountService.Models.MbResult`1.Failure(AccountService.Models.MbError)">
+            <summary>
+            Создает результат с ошибкой
+            </summary>
+            <param name="error">Информация об ошибке</param>
+        </member>
+        <member name="T:AccountService.Models.MbError">
+            <summary>
+            Информация об ошибке
+            </summary>
+        </member>
+        <member name="M:AccountService.Models.MbError.#ctor(System.String,System.Int32,System.Collections.Generic.Dictionary{System.String,System.String[]})">
+            <summary>
+            Информация об ошибке
+            </summary>
+        </member>
+        <member name="T:AccountService.Models.Transaction">
+            <summary>
+            Представляет финансовую транзакцию
+            </summary>
+        </member>
+        <member name="P:AccountService.Models.Transaction.Id">
+            <summary>
+            Уникальный идентификатор транзакции
+            </summary>
+        </member>
+        <member name="P:AccountService.Models.Transaction.AccountId">
+            <summary>
+            Идентификатор счета
+            </summary>
+        </member>
+        <member name="P:AccountService.Models.Transaction.CounterpartyAccountId">
+            <summary>
+            Идентификатор счета контрагента (для переводов)
+            </summary>
+        </member>
+        <member name="P:AccountService.Models.Transaction.Amount">
+            <summary>
+            Сумма транзакции
+            </summary>
+        </member>
+        <member name="P:AccountService.Models.Transaction.Currency">
+            <summary>
+            Валюта транзакции (ISO 4217 код)
+            </summary>
+        </member>
+        <member name="P:AccountService.Models.Transaction.Type">
+            <summary>
+            Тип транзакции (Кредит/Дебет)
+            </summary>
+        </member>
+        <member name="P:AccountService.Models.Transaction.Description">
+            <summary>
+            Описание транзакции
+            </summary>
+        </member>
+        <member name="P:AccountService.Models.Transaction.DateTime">
+            <summary>
+            Дата и время совершения транзакции
+            </summary>
+        </member>
+        <member name="T:AccountService.Models.ETransactionType">
+            <summary>
+            Типы финансовых транзакций
+            </summary>
+        </member>
+        <member name="F:AccountService.Models.ETransactionType.Credit">
+            <summary>
+            Кредит (зачисление средств)
+            </summary>
+        </member>
+        <member name="F:AccountService.Models.ETransactionType.Debit">
+            <summary>
+            Дебет (списание средств)
+            </summary>
+        </member>
+        <member name="T:PagedResponse`1">
+            <summary>Ответ с пагинацией</summary>
+            <typeparam name="T">Тип элементов в коллекции</typeparam>
+        </member>
+        <member name="M:PagedResponse`1.#ctor(System.Collections.Generic.IEnumerable{`0},System.Int32,System.Int32,System.Int64)">
+            <summary>Ответ с пагинацией</summary>
+            <typeparam name="T">Тип элементов в коллекции</typeparam>
+        </member>
+    </members>
+</doc>

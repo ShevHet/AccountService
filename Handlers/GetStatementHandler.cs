@@ -3,59 +3,58 @@ using AccountService.Services;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace AccountService.Handlers
 {
+    /// <summary>
+    /// Запрос получения выписки по счету
+    /// </summary>
     public sealed record GetStatementQuery(
+        /// <summary>
+        /// Идентификатор счета
+        /// </summary>
         Guid AccountId,
+
+        /// <summary>
+        /// Начальная дата периода (опционально)
+        /// </summary>
         DateTime? From,
-        DateTime? To,
-        string Format = "json"
-    ) : IRequest<IActionResult>;
 
-    public class GetStatementValidator : AbstractValidator<GetStatementQuery>
-    {
-        public GetStatementValidator()
-        {
-            RuleFor(x => x.AccountId).NotEmpty();
-            RuleFor(x => x.To)
-                .GreaterThanOrEqualTo(x => x.From)
-                .When(x => x.From.HasValue && x.To.HasValue)
-                .WithMessage("Дата 'до' должна быть после даты 'с'");
-            RuleFor(x => x.Format)
-                .Must(f => f == "json" || f == "pdf")
-                .WithMessage("Неподдерживаемый формат. Допустимые значения: json, pdf");
-        }
-    }
+        /// <summary>
+        /// Конечная дата периода (опционально)
+        /// </summary>
+        DateTime? To
+    ) : IRequest<List<Transaction>>;
 
-    public class GetStatementHandler : IRequestHandler<GetStatementQuery, IActionResult>
+    public sealed class GetStatementHandler : IRequestHandler<GetStatementQuery, List<Transaction>>
     {
         private readonly IAccountRepository _repository;
-        private readonly IValidator<GetStatementQuery> _validator;
 
-        public GetStatementHandler(
-            IAccountRepository repository,
-            IValidator<GetStatementQuery> validator)
+        public GetStatementHandler(IAccountRepository repository)
         {
             _repository = repository;
-            _validator = validator;
         }
 
-        public async Task<IActionResult> Handle(GetStatementQuery request, CancellationToken ct)
+        public async Task<List<Transaction>> Handle(GetStatementQuery request, CancellationToken cancellationToken)
         {
-            var validationResult = await _validator.ValidateAsync(request, ct);
-            if (!validationResult.IsValid)
+            // Простая валидация
+            if (request.AccountId == Guid.Empty)
             {
-                return new BadRequestObjectResult(validationResult.Errors);
+                throw new ArgumentException("Неверный ID счета");
             }
 
-            var account = await _repository.GetByIdAsync(request.AccountId);
+            var account = await _repository.GetByIdAsync(request.AccountId, cancellationToken);
             if (account == null)
             {
-                return new NotFoundObjectResult("Счет не найден");
+                throw new KeyNotFoundException("Счет не найден");
             }
 
-            var transactions = account.Transactions.AsEnumerable();
+            var transactions = account.Transactions.AsQueryable();
 
             if (request.From.HasValue)
             {
@@ -67,22 +66,7 @@ namespace AccountService.Handlers
                 transactions = transactions.Where(t => t.DateTime <= request.To.Value);
             }
 
-            var result = transactions.ToList();
-
-            if (request.Format.Equals("pdf", StringComparison.OrdinalIgnoreCase))
-            {
-                return new FileContentResult(GeneratePdf(result), "application/pdf")
-                {
-                    FileDownloadName = $"statement_{request.AccountId}.pdf"
-                };
-            }
-
-            return new OkObjectResult(result);
-        }
-
-        private byte[] GeneratePdf(List<Transaction> transactions)
-        {
-            return System.Text.Encoding.UTF8.GetBytes("PDF заглушка");
+            return transactions.ToList();
         }
     }
 }
