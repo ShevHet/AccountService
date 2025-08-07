@@ -9,9 +9,10 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - keycloak
+      keycloak:
+        condition: service_healthy
     environment:
-      - Jwt__Authority=http://keycloak:8081/realms/master
+      - Jwt__Authority=http://keycloak:8080/realms/master  # Исправлен порт
       - Jwt__Audience=account-service
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
@@ -37,9 +38,19 @@ services:
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_HOSTNAME=localhost             # Важно для корректной работы
+      - KC_HTTP_ENABLED=true              # Разрешить HTTP
+      - KC_PROXY=edge                     # Для работы за прокси
+      - QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY=true  # Исправление предупреждения
+      - KC_HOSTNAME_STRICT_HTTPS=false    # Разрешить HTTP для разработки
     command: ["start-dev", "--http-port=8080"]
     ports:
-    - "8080:8080"
+      - "8081:8080"  # Исправленный порт (без конфликта)
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
 volumes:
   pgdata:

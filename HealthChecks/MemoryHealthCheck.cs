@@ -36,6 +36,6 @@ namespace AccountService.HealthChecks
 
     public class MemoryCheckOptions
     {
-        public long ThresholdBytes { get; set; } = 100 * 1024 * 1024; // 100 MB по умолчанию
+        public long ThresholdBytes { get; set; } = 100 * 1024 * 1024; 
     }
 }
