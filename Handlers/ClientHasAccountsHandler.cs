@@ -6,7 +6,7 @@ namespace AccountService.Handlers
     /// <summary>
     /// Запрос проверки наличия счетов у клиента
     /// </summary>
-    public sealed record ClientHasAccountsQuery(
+    public sealed record ClientHasAccountsQuery( 
         /// <summary>
         /// Идентификатор клиента
         /// </summary>

@@ -15,7 +15,7 @@
             <response code="200">Успешно возвращен список счетов</response>
             <response code="500">Внутренняя ошибка сервера</response>
         </member>
-        <!-- Badly formed XML comment ignored for member M:AccountService.Controllers.AccountsController.SearchAccounts(AccountService.Handlers.GetAccountsQuery) -->
+        <!-- Badly formed XML comment ignored for member "M:AccountService.Controllers.AccountsController.SearchAccounts(AccountService.Handlers.GetAccountsQuery)" -->
         <member name="M:AccountService.Controllers.AccountsController.GetAccountById(System.Guid)">
             <summary>
             Получение счета по идентификатору
@@ -33,7 +33,7 @@
             <response code="200">Успешно выполнена проверка</response>
             <response code="500">Внутренняя ошибка сервера</response>
         </member>
-        <!-- Badly formed XML comment ignored for member M:AccountService.Controllers.AccountsController.GetBalance(System.Guid)" -->
+        <!-- Badly formed XML comment ignored for member "M:AccountService.Controllers.AccountsController.GetBalance(System.Guid)" -->
         <member name="M:AccountService.Controllers.AccountsController.CreateAccount(AccountService.Handlers.CreateAccountCommand)">
             <summary>
             Создание нового счета

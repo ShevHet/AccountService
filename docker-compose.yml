@@ -12,7 +12,7 @@ services:
       keycloak:
         condition: service_healthy
     environment:
-      - Jwt__Authority=http://keycloak:8080/realms/master  # Исправлен порт
+      - Jwt__Authority=http://keycloak:8080/realms/master  # Внутренний адрес контейнера keycloak
       - Jwt__Audience=account-service
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
@@ -38,14 +38,14 @@ services:
     environment:
       - KEYCLOAK_ADMIN=admin
       - KEYCLOAK_ADMIN_PASSWORD=admin
-      - KC_HOSTNAME=localhost             # Важно для корректной работы
-      - KC_HTTP_ENABLED=true              # Разрешить HTTP
-      - KC_PROXY=edge                     # Для работы за прокси
-      - QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY=true  # Исправление предупреждения
-      - KC_HOSTNAME_STRICT_HTTPS=false    # Разрешить HTTP для разработки
+      - KC_HOSTNAME=localhost            # Для корректной работы и доступа по localhost
+      - KC_HTTP_ENABLED=true            # Разрешить HTTP (не HTTPS)
+      - KC_PROXY=edge                   # Для работы за прокси
+      - QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY=true  # Предупреждения quarkus
+      - KC_HOSTNAME_STRICT_HTTPS=false  # Отключить строгую проверку HTTPS
     command: ["start-dev", "--http-port=8080"]
     ports:
-      - "8081:8080"  # Исправленный порт (без конфликта)
+      - "8090:8080"   # Изменил на 8090, чтобы не конфликтовать с account-service
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
       interval: 10s

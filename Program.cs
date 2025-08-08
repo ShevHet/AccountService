@@ -125,35 +125,30 @@ if (string.IsNullOrWhiteSpace(jwtAudience))
     throw new InvalidOperationException("JWT Audience is not configured.");
 
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-.AddJwtBearer(options =>
-{
-    options.Authority = "http://keycloak:8080/realms/master";
-    options.Audience = "account-service";
-    options.RequireHttpsMetadata = false;
-
-    options.TokenValidationParameters = new TokenValidationParameters
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-        ValidateIssuer = true,
-        ValidIssuer = "http://keycloak:8080/realms/master",
-        ValidateAudience = true,
-        ValidAudience = "account-service",
-        ValidateLifetime = true
-    };
+        options.Authority = jwtAuthority; // из конфигурации
+        options.Audience = jwtAudience;   // из конфигурации
+        options.RequireHttpsMetadata = false;
 
-    // Отключение проверок в development-режиме
-    if (builder.Environment.IsDevelopment())
-    {
-        options.TokenValidationParameters.ValidateAudience = false;
-        options.TokenValidationParameters.ValidateIssuer = false;
-        options.TokenValidationParameters.ValidateLifetime = false;
-        options.TokenValidationParameters.RequireExpirationTime = false;
-    }
-});
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtAuthority,
+            ValidateAudience = true,
+            ValidAudience = jwtAudience,
+            ValidateLifetime = true
+        };
+
+        if (builder.Environment.IsDevelopment())
+        {
+            options.TokenValidationParameters.ValidateAudience = false;
+            options.TokenValidationParameters.ValidateIssuer = false;
+            options.TokenValidationParameters.ValidateLifetime = false;
+            options.TokenValidationParameters.RequireExpirationTime = false;
+        }
+    });
 
 // Авторизация
 builder.Services.AddAuthorization();

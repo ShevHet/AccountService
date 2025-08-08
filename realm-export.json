@@ -1,6 +1,6 @@
 {
-	"id": "mb-realm",
-	"realm": "mb-realm",
+	"id": "account-realm",
+	"realm": "account-realm",
 	"enabled": true,
 	"clients": [
 		{
@@ -8,7 +8,7 @@
 			"protocol": "openid-connect",
 			"enabled": true,
 			"publicClient": false,
-			"secret": "account-service-secret",
+			"secret": "oA6YkejSTTQeqCBVSBFw5TD0LmjPDE4Z",
 			"redirectUris": [
 				"*"
 			],
@@ -16,7 +16,8 @@
 				"*"
 			],
 			"standardFlowEnabled": true,
-			"directAccessGrantsEnabled": true
+			"directAccessGrantsEnabled": true,
+			"serviceAccountsEnabled": true
 		}
 	],
 	"roles": {
@@ -26,19 +27,19 @@
 				"description": "Standard user role",
 				"composite": false,
 				"clientRole": false,
-				"containerId": "mb-realm"
+				"containerId": "account-realm"
 			}
 		]
 	},
 	"users": [
 		{
-			"username": "test-user",
+			"username": "testuser",
 			"enabled": true,
 			"emailVerified": true,
 			"credentials": [
 				{
 					"type": "password",
-					"value": "test-password",
+					"value": "password",
 					"temporary": false
 				}
 			],

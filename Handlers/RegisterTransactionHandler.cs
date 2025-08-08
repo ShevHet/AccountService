@@ -10,12 +10,11 @@ namespace AccountService.Handlers
     /// <summary>
     /// Команда регистрации транзакции
     /// </summary>
-    public sealed record RegisterTransactionCommand(
+    public sealed record RegisterTransactionCommand( 
         /// <summary>
         /// Идентификатор счета
         /// </summary>
         Guid AccountId,
-
         /// <summary>
         /// Сумма транзакции
         /// </summary>
